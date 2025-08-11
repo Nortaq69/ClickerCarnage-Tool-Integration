@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clicker Carnage Pro - Futuristic UI</title>
+    <link rel="preload" href="assets/fonts/JetBrainsMono-Regular.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="assets/fonts/Orbitron-Regular.ttf" as="font" type="font/ttf" crossorigin>
+    <style>
+        @font-face {
+            font-family: 'Orbitron';
+            src: url('assets/fonts/Orbitron-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'JetBrains Mono';
+            src: url('assets/fonts/JetBrainsMono-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+        :root {
+            --accent: #00fff7;
+            --bg: #0a0a0a;
+            --panel: rgba(10,20,40,0.85);
+            --glass: rgba(20,40,60,0.55);
+            --radius: 20px;
+            --shadow: 0 0 30px var(--accent), 0 4px 32px #000b;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Orbitron', 'JetBrains Mono', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: var(--accent);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        #app {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 2.5rem 0 2rem 0;
+        }
+        .bg-particles-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+        /* Neon/Glassmorphism panel base */
+        .neon-panel {
+            background: var(--panel);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 2px solid var(--accent);
+            backdrop-filter: blur(18px);
+            padding: 2.5rem 2rem;
+            margin: 1.5rem 0;
+            position: relative;
+            z-index: 1;
+        }
+        /* Add more CSS for .neon-btn, .neon-toggle-wrapper, .neon-slider-wrapper, .neon-gauge-wrapper, .tab-bar, .modal-overlay, .theme-switcher, etc. */
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+    <script type="module">
+        import startParticles from './assets/effects/particles.js';
+        import NeonButton from './components/ui/NeonButton.js';
+        import NeonToggle from './components/ui/NeonToggle.js';
+        import NeonSlider from './components/ui/NeonSlider.js';
+        import NeonGauge from './components/ui/NeonGauge.js';
+        import TabManager from './components/layout/TabManager.js';
+        import Modal from './components/layout/Modal.js';
+        import ThemeSwitcher from './components/layout/ThemeSwitcher.js';
+        import IconLoader from './components/ui/IconLoader.js';
+
+        // Start background VFX
+        startParticles({ color: getComputedStyle(document.documentElement).getPropertyValue('--accent') });
+
+        // App root
+        const app = document.getElementById('app');
+
+        // Theme switcher
+        const themeSwitcher = new ThemeSwitcher({
+            accents: ['#00fff7', '#ff00ff', '#2ed573', '#ff4757'],
+            defaultAccent: 0,
+            onChange: color => {
+                // Optionally update VFX color
+            }
+        });
+        themeSwitcher.mount(app);
+
+        // Neon panels for main sections
+        const configPanel = document.createElement('div');
+        configPanel.className = 'neon-panel';
+        configPanel.style.maxWidth = '420px';
+        configPanel.innerHTML = `<h2>Configuration</h2>`;
+        // Add custom NeonSlider, NeonToggle, NeonButton, etc. here
+        const slider = new NeonSlider({ min: 1, max: 1000, value: 100, onChange: v => {} });
+        slider.mount(configPanel);
+        const toggle = new NeonToggle({ checked: true, onChange: v => {} });
+        toggle.mount(configPanel);
+        const startBtn = new NeonButton({ label: 'Start', icon: 'assets/ui/neon-power.svg', onClick: () => showModal('Automation started!') });
+        startBtn.mount(configPanel);
+        const stopBtn = new NeonButton({ label: 'Stop', accent: '#ff4757', icon: 'assets/ui/neon-power.svg', onClick: () => showModal('Automation stopped!') });
+        stopBtn.mount(configPanel);
+
+        // Neon stats panel
+        const statsPanel = document.createElement('div');
+        statsPanel.className = 'neon-panel';
+        statsPanel.style.maxWidth = '420px';
+        statsPanel.innerHTML = `<h2>Statistics</h2>`;
+        const gauge = new NeonGauge({ value: 0, min: 0, max: 1000, label: 'CPS', accent: '#00fff7' });
+        gauge.mount(statsPanel);
+
+        // Tabbed panel for advanced features
+        const advancedPanel = document.createElement('div');
+        advancedPanel.className = 'neon-panel';
+        advancedPanel.style.maxWidth = '900px';
+        const macroContent = document.createElement('div');
+        macroContent.innerHTML = '<h3>Macro Recorder</h3>';
+        const gestureContent = document.createElement('div');
+        gestureContent.innerHTML = '<h3>Gesture Recognition</h3>';
+        const analyticsContent = document.createElement('div');
+        analyticsContent.innerHTML = '<h3>Analytics</h3>';
+        new TabManager([
+            { label: 'Macros', icon: 'assets/ui/neon-power.svg', content: macroContent },
+            { label: 'Gestures', icon: 'assets/ui/neon-power.svg', content: gestureContent },
+            { label: 'Analytics', icon: 'assets/ui/neon-power.svg', content: analyticsContent },
+        ], advancedPanel);
+
+        // Mount panels
+        app.appendChild(configPanel);
+        app.appendChild(statsPanel);
+        app.appendChild(advancedPanel);
+
+        // Modal example
+        function showModal(msg) {
+            const modal = new Modal({ content: `<div style='padding:2rem;text-align:center;'>${msg}</div>` });
+            modal.open();
+        }
+    </script>
+</body>
+</html> 
